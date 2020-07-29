@@ -52,6 +52,11 @@ class InstagramBot:
         x = '{}{}'.format(string.digits, string.ascii_letters)
         return ''.join(random.choice(x) for _ in range(word_length))
 
+    @staticmethod
+    def create_folder(folder_path):
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
     def giris_yap(self, user_name_str, password_str):
         self.driver.get(self.main_insta_url)
         time.sleep(2)
@@ -104,15 +109,15 @@ class InstagramBot:
             self.scroll_down_page(dialog, allfoll)
 
             image_list = []
+            save_folder_path = os.path.join(self.save_image_path, "images", self.user_name)
+            self.create_folder(save_folder_path)
+
             while True:
                 try:
                     self.delay(random.randint(500, 1000) / 1000)
 
                     # download image url
                     image_xpath = None
-                    save_folder_path = os.path.join(self.save_image_path, "images", self.user_name)
-                    self.create_folder(save_folder_path)
-
                     save_image_file_path = os.path.join(save_folder_path, "{}.png".format(self.generator_id()))
 
                     try:
@@ -142,14 +147,13 @@ class InstagramBot:
                     # get image commend
                     commend_xpath = None
                     try:
-                        # EtaWk
                         commend_xpath = self.driver.find_element_by_css_selector('.EtaWk ').\
                             find_element_by_css_selector(".C4VMK").text
                         commend_xpath = commend_xpath.replace('\n', ' -$#$- ')
 
                     except Exception as e:
                         logging.error(f"commend_xpath error: {e}")
-                        commend_xpath = ""
+                        commend_xpath = " -$#$- "
 
                     if commend_xpath:
                         print(f"commend_xpath: {commend_xpath}")
@@ -227,6 +231,8 @@ if __name__ == '__main__':
     # login instagram
     insta_boot.giris_yap(user_name, password)
 
+    # insta_boot.user_name = "other user_name"
+    # user_name = insta_boot.user_name
     get_url = insta_boot.get_request_url(user_name)
     logging.info("{} adlı kullanıcının takipçi listesi çekiliyor".format(user_name))
     logging.info("Request insta user url: {}".format(get_url))
